@@ -13,7 +13,7 @@ public class CardInfo
 	@Column(name = "USER_ID", nullable = false)
 	private Long userId;
 
-	@Column(name = "CARDNUMBER", nullable = false, unique = true, length = 50)
+	@Column(name = "CARDNUMBER", nullable = false, unique = true, length = 16)
 	private String cardNumber;
 
 	public Long getUserId()

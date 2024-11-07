@@ -10,7 +10,6 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.aldimbilet.userservice.model.ABUser;
@@ -41,6 +40,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res) throws AuthenticationException
 	{
+		// {"username":"user", "password":"1234"}
 		try
 		{
 			ABUser creds = new ObjectMapper().readValue(req.getInputStream(), ABUser.class);
@@ -60,11 +60,11 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain, Authentication auth) throws IOException
 	{
 		// The user class is the spring framework user by dafault in spring security, not your custom user
-		String token = JWT.create().withSubject(((User) auth.getPrincipal()).getUsername()).withExpiresAt(new Date(System.currentTimeMillis() + 900000)).sign(Algorithm.HMAC512(JWTUtils.SECRET_KEY.getBytes()));
+		String token = JWT.create().withSubject(((ABUser) auth.getPrincipal()).getUsername()).withExpiresAt(new Date(System.currentTimeMillis() + 900000)).sign(Algorithm.HMAC512(JWTUtils.SECRET_KEY.getBytes()));
 		// I have configured it ilke (username) <342h3g349gh93ugb> kinda
 		// Ideally you would use some json format
 		// This could be anyform you would like as long as you get it in the body of the authentication response
-		String body = "(" + ((User) auth.getPrincipal()).getUsername() + ") " + token;
+		String body = "(" + ((ABUser) auth.getPrincipal()).getUsername() + ") " + token;
 		// Put it inside the response body
 		res.getWriter().write(body);
 		res.getWriter().flush();
@@ -73,7 +73,6 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	@Override
 	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException
 	{
-		System.err.println("şifre yanlış");
 		if (failed.getClass() == DisabledException.class)
 		{
 			response.getWriter().write("User is disabled");
@@ -84,6 +83,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		{
 			// Some mvc app or other app will get the UNAUTHORIZED status as an indicator
 			// DO NOT write body of the response here, keep it as simple as you can
+			response.getWriter().write("Wrong username password");
+			response.getWriter().flush();
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 		}
 		else

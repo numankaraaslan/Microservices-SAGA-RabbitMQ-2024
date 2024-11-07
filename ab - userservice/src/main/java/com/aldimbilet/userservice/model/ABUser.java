@@ -1,7 +1,11 @@
 package com.aldimbilet.userservice.model;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,7 +22,7 @@ import jakarta.persistence.Table;
 // a and b is the initials of the words "aldim" and "bilet"
 // Later than i have realised it became "abuser" :D this has nothing to do with any kind of abuse :D
 // In turkish, if you apply the same logic, this could also be Abuzer :)
-public class ABUser
+public class ABUser implements UserDetails
 {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,6 +62,7 @@ public class ABUser
 		this.id = id;
 	}
 
+	@Override
 	public String getUsername()
 	{
 		return username;
@@ -68,6 +73,7 @@ public class ABUser
 		this.username = username;
 	}
 
+	@Override
 	public String getPassword()
 	{
 		return password;
@@ -136,6 +142,12 @@ public class ABUser
 	public void setRoles(List<Role> roles)
 	{
 		this.roles = roles;
+	}
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities()
+	{
+		return roles;
 	}
 
 }

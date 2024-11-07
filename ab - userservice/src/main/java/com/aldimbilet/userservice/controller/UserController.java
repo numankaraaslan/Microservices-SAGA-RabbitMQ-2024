@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +25,6 @@ import com.aldimbilet.userservice.service.UserService;
 import com.aldimbilet.userservice.util.MapperUtils;
 
 @RestController
-@Lazy
 // this path "user" is to distinguish paths in the gateway, make it easier to read
 @RequestMapping(path = "/user")
 public class UserController

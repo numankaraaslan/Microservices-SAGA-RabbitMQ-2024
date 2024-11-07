@@ -8,6 +8,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SeConfig
@@ -29,7 +30,7 @@ public class SeConfig
 		// The rest of the endpoints may or may not require authentication, depends on your business decisions
 		http.authorizeHttpRequests(c -> c.anyRequest().authenticated());
 		// Add jwt athentication and authorization filters inside somwhere of the chain
-		http.addFilter(new JWTAuthenticationFilter(authenticationConfiguration.getAuthenticationManager()));
+		http.addFilterBefore(new JWTAuthenticationFilter(authenticationConfiguration.getAuthenticationManager()), UsernamePasswordAuthenticationFilter.class);
 		// login ' giderken önce token kontrolden geçmesin diye
 		http.addFilterAfter(new JWTAuthorizationFilter(), JWTAuthenticationFilter.class);
 		// this disables session creation on Spring Security
