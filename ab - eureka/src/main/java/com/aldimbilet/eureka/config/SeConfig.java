@@ -16,7 +16,7 @@ public class SeConfig
 		http.csrf(c -> c.disable());
 		http.formLogin(c -> c.defaultSuccessUrl("/"));
 		// management page is secured
-		http.authorizeHttpRequests(c -> c.requestMatchers("/").authenticated().anyRequest().permitAll());
+		http.authorizeHttpRequests(c -> c.anyRequest().authenticated());
 		return http.build();
 	}
 }
