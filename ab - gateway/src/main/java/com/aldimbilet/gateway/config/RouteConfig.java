@@ -42,7 +42,8 @@ public class RouteConfig
 		//		payment_fail_path = creator.createRouterFunction("/payment-failover", "lb://ab-paymentservice-failover");
 		//		// prepare all the routes
 		org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder.Builder routes = builder.routes();
-		routes.route(userroute -> userroute.path("/user/**").uri("lb://ab-userservice"));
+		routes.route(userfaileroute -> userfaileroute.path("/user-failover").uri("lb://ab-userservice-failover"));
+		routes.route(userroute -> userroute.path("/user/**").filters(fn -> fn.circuitBreaker(cns -> cns.setFallbackUri("forward:/user-failover"))).uri("lb://ab-userservice"));
 		//		routes.route("user failover route", user_fail_path);
 		//		routes.route("activity route", activity_path);
 		//		routes.route("activity failover route", activity_fail_path);
