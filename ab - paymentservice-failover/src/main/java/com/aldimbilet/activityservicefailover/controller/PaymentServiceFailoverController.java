@@ -1,11 +1,9 @@
 package com.aldimbilet.activityservicefailover.controller;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 // All paymentservice endpoints are forwarded here by gateway routeconfig
@@ -13,15 +11,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class PaymentServiceFailoverController
 {
-	@RequestMapping(path = "payment-failover", method = RequestMethod.GET, consumes = MediaType.TEXT_PLAIN_VALUE)
-	public ResponseEntity<Object> userServiceFails()
+	@GetMapping(path = "payment-failover")
+	public ResponseEntity<Object> paymentservicefailget()
 	{
 		ResponseEntity<Object> entity = new ResponseEntity<>("payment service is down, please wait", HttpStatus.SERVICE_UNAVAILABLE);
 		return entity;
 	}
 
-	@RequestMapping(path = "payment-failover", method = RequestMethod.POST, consumes = MediaType.TEXT_PLAIN_VALUE)
-	public ResponseEntity<Object> userServiceFails(@RequestBody String body)
+	@PostMapping(path = "payment-failover")
+	public ResponseEntity<Object> paymentservicefailpost()
 	{
 		ResponseEntity<Object> entity = new ResponseEntity<>("payment service is down, please wait", HttpStatus.SERVICE_UNAVAILABLE);
 		return entity;

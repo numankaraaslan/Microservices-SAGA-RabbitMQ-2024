@@ -44,6 +44,10 @@ public class RouteConfig
 		org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder.Builder routes = builder.routes();
 		routes.route(userfaileroute -> userfaileroute.path("/user-failover").uri("lb://ab-userservice-failover"));
 		routes.route(userroute -> userroute.path("/user/**").filters(fn -> fn.circuitBreaker(cns -> cns.setFallbackUri("forward:/user-failover"))).uri("lb://ab-userservice"));
+		routes.route(userfaileroute -> userfaileroute.path("/activity-failover").uri("lb://ab-activityservice-failover"));
+		routes.route(userroute -> userroute.path("/act/**").filters(fn -> fn.circuitBreaker(cns -> cns.setFallbackUri("forward:/activity-failover"))).uri("lb://ab-activityservice"));
+		routes.route(userfaileroute -> userfaileroute.path("/payment-failover").uri("lb://ab-paymentservice-failover"));
+		routes.route(userroute -> userroute.path("/pay/**").filters(fn -> fn.circuitBreaker(cns -> cns.setFallbackUri("forward:/payment-failover"))).uri("lb://ab-paymentservice"));
 		//		routes.route("user failover route", user_fail_path);
 		//		routes.route("activity route", activity_path);
 		//		routes.route("activity failover route", activity_fail_path);
