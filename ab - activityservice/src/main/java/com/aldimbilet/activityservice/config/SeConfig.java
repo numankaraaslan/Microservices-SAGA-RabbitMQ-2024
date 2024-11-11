@@ -17,6 +17,7 @@ public class SeConfig
 		// csrf disable to get jwt headers go through
 		http.csrf(c -> c.disable());
 		// getActivities endpoint is free for all
+		http.authorizeHttpRequests(c -> c.requestMatchers("/act/portinfo").permitAll());
 		http.authorizeHttpRequests(c -> c.requestMatchers("/act/getActivities").permitAll());
 		http.authorizeHttpRequests(c -> c.requestMatchers("/act/getActivityInfo").permitAll());
 		// The rest of the endpoints may or may not require authentication, depends on your business decisions

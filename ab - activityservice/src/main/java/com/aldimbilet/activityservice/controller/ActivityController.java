@@ -30,7 +30,7 @@ public class ActivityController
 	@Autowired
 	ActivityRepository repo;
 
-	@GetMapping(path = "hello")
+	@GetMapping(path = "portinfo")
 	public ResponseEntity<String> hello()
 	{
 		// This hello endpoint expects a header for jwt authentication with the help of spring security and jwtauthfilter
