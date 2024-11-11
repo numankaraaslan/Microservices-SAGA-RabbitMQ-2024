@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +28,7 @@ import com.aldimbilet.userservice.util.MapperUtils;
 public class UserController
 {
 	@Autowired
-	Environment environment;
+	org.springframework.core.env.Environment environment;
 
 	@Autowired
 	UserService userService;
@@ -38,12 +36,10 @@ public class UserController
 	@Autowired
 	CardRepository cardRepo;
 
-	@GetMapping(path = "hello")
-	public ResponseEntity<String> hello(ServletWebServerApplicationContext webServerAppCtxt)
+	@GetMapping(path = "portinfo")
+	public ResponseEntity<String> portinfo()
 	{
-		// This hello endpoint expects a header for jwt authentication with the help of spring security and jwtauthfilter
-		ResponseEntity<String> entity = new ResponseEntity<>(environment.getProperty("local.server.port"), HttpStatus.OK);
-		return entity;
+		return ResponseEntity.ok(environment.getProperty("local.server.port") + "");
 	}
 
 	@GetMapping(path = "getUserCard")
