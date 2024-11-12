@@ -1,6 +1,7 @@
 package com.aldimbilet.website.feign;
 
 import java.util.List;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+
 import com.aldimbilet.pojos.ActivityPojo;
 import com.aldimbilet.util.Constants;
 
@@ -22,8 +24,8 @@ public interface ActivityClient
 	// Your feign client methods must have the same return type and parameters and the http path
 	// Just like invoking a method in java
 	// path = localhost:4441/act/hello
-	@GetMapping(path = "hello")
-	ResponseEntity<String> sayHello(@RequestHeader(value = Constants.HEADER_STRING) String token);
+	@GetMapping(path = "portinfo")
+	ResponseEntity<String> sayHello();
 
 	// The getActivities endpoint in the activityservice returns ResponseEntity
 	// Your feign client methods must have the same return type and parameters and the http path

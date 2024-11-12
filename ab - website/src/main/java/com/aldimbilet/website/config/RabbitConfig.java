@@ -36,11 +36,11 @@ public class RabbitConfig
 
 	@Bean
 	@DependsOn(value = { "emailReceiptTopic", "emailReceiptQueue" })
-	public Binding emailReceiptBinding(TopicExchange exchange, Queue emailReceiptQueue)
+	public Binding emailReceiptBinding(TopicExchange topicexchange, Queue emailReceiptQueue)
 	{
 		// Bind the emailReceiptQueue to an exchange with a routing key definiton
 		// The messages starting with "email.receipt." will be used in exchange to bind it to emailReceiptQueue
-		return BindingBuilder.bind(emailReceiptQueue).to(exchange).with("email.receipt.*");
+		return BindingBuilder.bind(emailReceiptQueue).to(topicexchange).with("email.receipt.*");
 	}
 
 	@Bean(name = "emailCancelationDirect")
@@ -59,11 +59,11 @@ public class RabbitConfig
 
 	@Bean
 	@DependsOn(value = { "emailCancelationDirect", "emailCancelationQueue" })
-	public Binding deadLetterBinding(@Value("emailCancelationDirect") DirectExchange direct, @Value("emailCancelationQueue") Queue emailCancelationQueue)
+	public Binding deadLetterBinding(@Value("emailCancelationDirect") DirectExchange directexchange, @Value("emailCancelationQueue") Queue emailCancelationQueue)
 	{
 		// Bind the emailCancelationQueue to an exchange with a routing key
 		// The exact messages "email.cancelation" will be used in exchange to bind it to emailCancelationQueue
-		return BindingBuilder.bind(emailCancelationQueue).to(direct).with("email.cancelation");
+		return BindingBuilder.bind(emailCancelationQueue).to(directexchange).with("email.cancelation");
 	}
 
 	@Bean(name = "deadLetterExchange")

@@ -1,6 +1,7 @@
 package com.aldimbilet.website.feign;
 
 import java.util.List;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+
 import com.aldimbilet.pojos.CardInfoPojo;
 import com.aldimbilet.pojos.UserInfoPojo;
 import com.aldimbilet.pojos.UserRegisterPojo;
@@ -24,8 +26,8 @@ public interface UserClient
 	// Your feign client methods must have the same return type and parameters and the http path
 	// Just like invoking a method in java
 	// path = localhost:4441/user/hello
-	@GetMapping(path = "hello")
-	ResponseEntity<String> sayHello(@RequestHeader(value = Constants.HEADER_STRING) String token);
+	@GetMapping(path = "portinfo")
+	ResponseEntity<String> sayHello();
 
 	// There is a request body parameter here to be able to cope with spring security all the way down to userservice
 	// It will by default require a username and password json object as the post body

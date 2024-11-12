@@ -123,10 +123,11 @@ public class MikroServiceSagaController
 		// userregisterpojo object for thymeleaf form
 		UserRegisterPojo pojo = new UserRegisterPojo();
 		// some default values for ease
+		int number = new Random().nextInt(100);
 		pojo.setEmail("asd@asd.com");
-		pojo.setName("user");
+		pojo.setName("user" + number);
 		pojo.setSurname("asd");
-		pojo.setUsername("user" + new Random().nextInt(100));
+		pojo.setUsername("user" + number);
 		signup.addObject("userregisterpojo", pojo);
 		return signup;
 	}
@@ -258,9 +259,7 @@ public class MikroServiceSagaController
 		basket.setActId(actId);
 		basket.setUserId(userId);
 		req.getSession().setAttribute(SessionConstants.BASKET, basket);
-		String username = userPojo.getName();
 		String eventname = activityPojo.getName();
-		eventdetails.addObject("username", username);
 		eventdetails.addObject("eventname", eventname);
 		return eventdetails;
 	}
@@ -311,14 +310,14 @@ public class MikroServiceSagaController
 		return events;
 	}
 
-	@GetMapping(path = { "", "index" })
+	@GetMapping(path = { "", "/", "index" })
 	public ModelAndView index(HttpServletRequest req)
 	{
 		// Normally there will be a logic for secure or free services
 		// Free endpoints will not require jwt headers and they won't require @RequestHeader in @FeignClient classes
 		String bearer = (String) req.getSession().getAttribute(SessionConstants.BEARER);
 		String username = (String) req.getSession().getAttribute(SessionConstants.USERNAME);
-		String userInfo = "", userString = "", actString = "";
+		String userInfo = "", userString = "", actString = "", payString = "";
 		if (username != null)
 		{
 			ResponseEntity<UserInfoPojo> resp = null;
@@ -336,7 +335,6 @@ public class MikroServiceSagaController
 				{
 					userInfo = "Failed to get user info";
 				}
-				userString = "From user service port number " + userClient.sayHello(Constants.TOKEN_PREFIX + bearer).getBody();
 			}
 			catch (FeignException e)
 			{
@@ -346,27 +344,52 @@ public class MikroServiceSagaController
 					userString = "User service is not accasible";
 				}
 			}
-			try
-			{
-				actString = "From activity service port number " + activityClient.sayHello(Constants.TOKEN_PREFIX + bearer).getBody();
-			}
-			catch (FeignException e)
-			{
-				if (e.status() == HttpStatus.SERVICE_UNAVAILABLE.value())
-				{
-					// 503
-					actString = "Activity service is not accasible";
-				}
-			}
 		}
 		else
 		{
 			userInfo = "Nobody is logged in yet";
 		}
+		try
+		{
+			userString = "From user service port number " + userClient.sayHello().getBody();
+		}
+		catch (FeignException e)
+		{
+			if (e.status() == HttpStatus.SERVICE_UNAVAILABLE.value())
+			{
+				// 503
+				actString = "User service is not accasible";
+			}
+		}
+		try
+		{
+			actString = "From activity service port number " + activityClient.sayHello().getBody();
+		}
+		catch (FeignException e)
+		{
+			if (e.status() == HttpStatus.SERVICE_UNAVAILABLE.value())
+			{
+				// 503
+				actString = "Activity service is not accasible";
+			}
+		}
+		try
+		{
+			payString = "From payment service port number " + paymentClient.sayHello().getBody();
+		}
+		catch (FeignException e)
+		{
+			if (e.status() == HttpStatus.SERVICE_UNAVAILABLE.value())
+			{
+				// 503
+				payString = "Payment service is not accasible";
+			}
+		}
 		ModelAndView index = new ModelAndView("index");
 		index.addObject("userInfo", userInfo);
 		index.addObject("userString", userString);
 		index.addObject("actString", actString);
+		index.addObject("payString", payString);
 		return index;
 	}
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 <title th:text="index"></title>
 <meta charset="utf-8">
@@ -29,7 +29,7 @@
 					<td><label th:text="${act.id}"></label></td>
 					<td><label th:text="${act.name}"></label></td>
 					<td>
-						<form th:action="@{'admin'}" method="post">
+						<form action="admin" method="post">
 							<input type="hidden" th:value="${act.id}" id="actid" name="actid">
 							<input type="submit" th:value = "cancelation">
 						</form>

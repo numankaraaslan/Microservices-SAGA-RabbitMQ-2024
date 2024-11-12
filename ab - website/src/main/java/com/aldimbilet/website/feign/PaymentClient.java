@@ -3,9 +3,11 @@ package com.aldimbilet.website.feign;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+
 import com.aldimbilet.util.Constants;
 
 // Must give a url to NOT use load balancer (we have a gateway that routes to eureka with lb:// links)
@@ -14,6 +16,9 @@ import com.aldimbilet.util.Constants;
 @FeignClient(url = "${gateway.adress.paymentservice}", name = "PaymentClient")
 public interface PaymentClient
 {
+	@GetMapping(path = "portinfo")
+	ResponseEntity<String> sayHello();
+
 	@PostMapping(path = "makePayment", consumes = MediaType.TEXT_PLAIN_VALUE)
 	ResponseEntity<Boolean> makePayment(@RequestHeader(value = Constants.HEADER_STRING) String token, @RequestBody String cardNumber);
 
