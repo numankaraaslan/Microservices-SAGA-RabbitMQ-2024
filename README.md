@@ -7,3 +7,7 @@ http://www.numankaraaslan.com/entry?ent=82&lang=en
 or
 
 http://www.numankaraaslan.com/entry?ent=82&lang=tr
+
+OR
+
+All you need is install docker engine, open terminal in the root folder and "docker compose up".
