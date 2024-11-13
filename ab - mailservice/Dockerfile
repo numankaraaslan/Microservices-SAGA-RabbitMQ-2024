@@ -7,4 +7,4 @@ COPY ./src ./src
 RUN mvn clean install -Dmaven.test.skip=true
 FROM eclipse-temurin:21.0.1_12-jre-jammy
 COPY --from=stage1 target/*.jar app.jar
-ENTRYPOINT ["java","-jar","/app.jar", "--logging.level.root=WARN", "--spring.rabbitmq.host=rabbitmq", "--gateway.adress.userservice=http://gateway:4441/user/", "--gateway.adress.activityservice=http://gateway:4441/act/", "--gateway.adress.paymentservice=http://gateway:4441/pay/"]
+ENTRYPOINT ["java","-jar","/app.jar", "--logging.level.root=WARN", "--spring.rabbitmq.host=rabbitmq"]

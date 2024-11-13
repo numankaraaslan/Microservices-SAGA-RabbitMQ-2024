@@ -12,8 +12,8 @@
 		<span><a href="logout">Logout</a></span>
 		<span><a href="events">Events</a></span>
 		<span><a href="admin">Management</a></span>
-		<span><a href="http://localhost:8761/" target="blank">Eureka</a></span>
-		<span><a href="http://localhost:15672/" target="blank">RabbitMQ</a></span>
+		<span><a href="http://localhost:8761/" target="_blank">Eureka</a></span>
+		<span><a href="http://localhost:15672/" target="_blank">RabbitMQ</a></span>
 	</div>
 	<h1>All events</h1>
 	<label th:if="${param.canceled}" th:text="'The even with the id: ' + ${param.canceled[0]} + ' is canceled and an email is sent to users'"></label>

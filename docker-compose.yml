@@ -145,6 +145,19 @@ services:
     depends_on:
       rabbitmq:
         condition: service_started
+      abutil:
+        condition: service_started
+    networks:
+      - spring-network
+      
+  mailservice:
+    build: ./ab - mailservice
+    container_name: mailservice
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      abutil:
+        condition: service_started
     networks:
       - spring-network
 

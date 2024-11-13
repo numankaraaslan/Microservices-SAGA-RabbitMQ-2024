@@ -1,5 +1,5 @@
 FROM microservices-saga-rabbitmq-2024-abutil AS util-stage
-FROM maven:3.9.9-eclipse-temurin-21-alpine as stage1
+FROM maven:3.9.9-eclipse-temurin-21-alpine AS stage1
 RUN mkdir -p /root/.m2/repository/com/aldimbilet/util
 COPY --from=util-stage /target/abutil.jar /root/.m2/repository/com/aldimbilet/util/1.0.0/util-1.0.0.jar
 COPY pom.xml .

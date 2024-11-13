@@ -1,4 +1,4 @@
-FROM maven:3.9.9-eclipse-temurin-21-alpine as stage1
+FROM maven:3.9.9-eclipse-temurin-21-alpine AS stage1
 COPY pom.xml .
 COPY ./src ./src
 RUN mvn clean install -Dmaven.test.skip=true
