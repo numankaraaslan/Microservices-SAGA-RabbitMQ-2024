@@ -1,0 +1,153 @@
+services:
+  eureka:
+    build: ./ab - eureka/
+    container_name: eureka
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - spring-network
+
+  config-server:
+    build: ./ab - config server/
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    depends_on:
+      eureka:
+        condition: service_healthy
+    networks:
+      - spring-network
+      
+  gateway:
+    build: ./ab - gateway
+    container_name: gateway
+    ports:
+      - "4441:4441"
+    depends_on:
+      config-server:
+        condition: service_healthy
+    networks:
+      - spring-network
+      
+  abutil:
+    build: ./ab - util
+    container_name: abutil
+    networks:
+      - spring-network
+      
+  postgresqldb:
+    image: postgres
+    container_name: postgresqldb
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=123456789
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=AB
+    networks:
+      - spring-network
+      
+  userservice:
+    build: ./ab - userservice
+    container_name: userservice
+    depends_on:
+      config-server:
+        condition: service_healthy
+      abutil:
+        condition: service_started
+      postgresqldb:
+        condition: service_started
+    networks:
+      - spring-network
+      
+  activityservice:
+    build: ./ab - activityservice
+    container_name: activityservice
+    depends_on:
+      config-server:
+        condition: service_healthy
+      abutil:
+        condition: service_started
+      postgresqldb:
+        condition: service_started
+    networks:
+      - spring-network
+      
+  paymentservice:
+    build: ./ab - paymentservice
+    container_name: paymentservice
+    depends_on:
+      config-server:
+        condition: service_healthy
+      abutil:
+        condition: service_started
+      postgresqldb:
+        condition: service_started
+    networks:
+      - spring-network
+      
+  userservicefailover:
+    build: ./ab - userservice-failover
+    container_name: userservicefailover
+    depends_on:
+      config-server:
+        condition: service_healthy
+    networks:
+      - spring-network
+      
+  activityservicefailover:
+    build: ./ab - activityservice-failover
+    container_name: activityservicefailover
+    depends_on:
+      config-server:
+        condition: service_healthy
+    networks:
+      - spring-network
+      
+  paymentservicefailover:
+    build: ./ab - paymentservice-failover
+    container_name: paymentservicefailover
+    depends_on:
+      config-server:
+        condition: service_healthy
+    networks:
+      - spring-network
+      
+  rabbitmq:
+    image: rabbitmq:management-alpine
+    container_name: rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - spring-network
+      
+  website:
+    build: ./ab - website
+    container_name: website
+    ports:
+      - "8080:8080"
+    depends_on:
+      rabbitmq:
+        condition: service_started
+    networks:
+      - spring-network
+
+networks:
+  spring-network:
+    driver: bridge

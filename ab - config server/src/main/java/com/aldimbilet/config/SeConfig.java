@@ -1,4 +1,4 @@
-package com.aldimbilet.eureka.config;
+package com.aldimbilet.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,8 +14,6 @@ public class SeConfig
 	{
 		http.csrf(custom -> custom.disable());
 		http.authorizeHttpRequests(custom -> custom.requestMatchers("/actuator/**").permitAll().anyRequest().authenticated());
-		http.formLogin(custom -> custom.defaultSuccessUrl("/"));
-		http.logout(custom -> custom.logoutSuccessUrl("/"));
 		http.httpBasic(custom -> Customizer.withDefaults());
 		return http.build();
 	}
