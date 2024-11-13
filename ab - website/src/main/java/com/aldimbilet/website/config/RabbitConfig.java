@@ -8,6 +8,7 @@ import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.core.RabbitTemplate.ConfirmCallback;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -22,6 +23,14 @@ import org.springframework.context.annotation.DependsOn;
 // If you don't specify bean names, spring boot will inject wrong
 public class RabbitConfig
 {
+	@Bean
+	public RabbitAdmin amqpAdmin(ConnectionFactory connectionFactory)
+	{
+		RabbitAdmin rabbitadmin = new RabbitAdmin(connectionFactory);
+		rabbitadmin.setAutoStartup(true);
+		return rabbitadmin;
+	}
+
 	@Bean(name = "emailReceiptTopic")
 	public TopicExchange rabbitTopic()
 	{

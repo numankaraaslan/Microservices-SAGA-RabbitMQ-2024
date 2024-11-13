@@ -7,4 +7,4 @@ COPY ./src ./src
 RUN mvn clean install -Dmaven.test.skip=true
 FROM eclipse-temurin:21.0.1_12-jre-jammy
 COPY --from=stage1 target/*.jar app.jar
-ENTRYPOINT ["java","-jar","/app.jar", "--logging.level.root=WARN", "--spring.rabbitmq.host=rabbitmq"]
+ENTRYPOINT ["java","-jar","/app.jar", "--logging.level.root=WARN", "--spring.rabbitmq.host=rabbitmq", "--spring.cloud.config.uri=http://config-server:8888", "--eureka.client.service-url.defaultZone=http://aldimbilet:eureka@eureka:8761/eureka"]

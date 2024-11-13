@@ -144,7 +144,7 @@ services:
       - "8080:8080"
     depends_on:
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
       abutil:
         condition: service_started
     networks:
@@ -154,8 +154,10 @@ services:
     build: ./ab - mailservice
     container_name: mailservice
     depends_on:
+      config-server:
+        condition: service_healthy
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
       abutil:
         condition: service_started
     networks:
