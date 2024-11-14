@@ -1,17 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <head>
 <title th:text="index"></title>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
 </head>
 <body>
 	<div>
-		<span><a href="/">Home</a></span>
-		<span><a href="login">Login</a></span>
-		<span><a href="logout">Logout</a></span>
-		<span><a href="events">Events</a></span>
-		<span><a href="admin">Management</a></span>
+		<span><a href="/">Home</a></span> <span
+			sec:authorize="!isAuthenticated()"><a href="login">Login</a></span> <span
+			sec:authorize="isAuthenticated()"><a href="logout">Logout</a></span>
+		<span><a href="events">Events</a></span> <span
+			sec:authorize="isAuthenticated()"><a href="admin">Management</a></span>
 		<span><a href="http://localhost:8761/" target="_blank">Eureka</a></span>
 		<span><a href="http://localhost:15672/" target="_blank">RabbitMQ</a></span>
 	</div>
@@ -19,19 +21,24 @@
 		<form th:action="signup" method="post" th:object="${userregisterpojo}">
 			<span> SignUp </span>
 			<div>
-				<label>Username</label> <br /> <input type="text" name="username" placeholder="username" th:field="*{username}">
+				<label>Username</label> <br /> <input type="text" name="username"
+					placeholder="username" th:field="*{username}">
 			</div>
 			<div>
-				<label>Email</label> <br /> <input type="email" name="email" placeholder="email" th:field="*{email}">
+				<label>Email</label> <br /> <input type="email" name="email"
+					placeholder="email" th:field="*{email}">
 			</div>
 			<div>
-				<label>Password</label> <br /> <input type="password" name="password" placeholder="password" th:field="*{password}">
+				<label>Password</label> <br /> <input type="password"
+					name="password" placeholder="password" th:field="*{password}">
 			</div>
 			<div>
-				<label>Name</label> <br /> <input type="text" name="name" placeholder="name" th:field="*{name}">
+				<label>Name</label> <br /> <input type="text" name="name"
+					placeholder="name" th:field="*{name}">
 			</div>
 			<div>
-				<label>Surname</label> <br /> <input type="text" name="surname" placeholder="surname" th:field="*{surname}">
+				<label>Surname</label> <br /> <input type="text" name="surname"
+					placeholder="surname" th:field="*{surname}">
 			</div>
 			<div>
 				<input type="submit" value="Signup">

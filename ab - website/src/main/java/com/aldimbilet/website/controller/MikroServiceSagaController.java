@@ -71,10 +71,10 @@ public class MikroServiceSagaController
 	}
 
 	@PostMapping(path = "login")
-	public ModelAndView login(HttpServletRequest req)
+	public ModelAndView login(HttpServletRequest request)
 	{
-		String username = req.getParameter("username");
-		String password = req.getParameter("password");
+		String username = request.getParameter("username");
+		String password = request.getParameter("password");
 		// Quick and dirty way of creating the necessary object for spring security
 		// This is basically a json object, could have been mapped from spring security User class to json with jackson
 		// I'm lazy
@@ -90,8 +90,8 @@ public class MikroServiceSagaController
 			token = responseEntity.getBody();
 			String bearer = token.substring(token.indexOf(" ") + 1);
 			user = token.substring(token.indexOf("(") + 1, token.indexOf(")"));
-			req.getSession().setAttribute(SessionConstants.BEARER, bearer);
-			req.getSession().setAttribute(SessionConstants.USERNAME, user);
+			request.getSession().setAttribute(SessionConstants.BEARER, bearer);
+			request.getSession().setAttribute(SessionConstants.USERNAME, user);
 			return new ModelAndView("redirect:/index");
 		}
 		catch (FeignException e)

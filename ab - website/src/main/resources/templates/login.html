@@ -1,42 +1,49 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <head>
 <title th:text="index"></title>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-	<div>
-		<span><a href="/">Home</a></span>
-		<span><a href="login">Login</a></span>
-		<span><a href="logout">Logout</a></span>
-		<span><a href="events">Events</a></span>
-		<span><a href="admin">Management</a></span>
-		<span><a href="http://localhost:8761/" target="_blank">Eureka</a></span>
-		<span><a href="http://localhost:15672/" target="_blank">RabbitMQ</a></span>
-	</div>
-	<div>
-		<form th:action="login" method="post">
-			<span> Login </span>
-			<div>
-				<input type="text" name="username" value="user" placeholder="username">
+	<div class="container-fluid">
+		<div>
+			<span><a href="/">Home</a></span> <span
+				sec:authorize="!isAuthenticated()"><a href="login">Login</a></span>
+			<span sec:authorize="isAuthenticated()"><a href="logout">Logout</a></span>
+			<span><a href="events">Events</a></span> <span
+				sec:authorize="isAuthenticated()"><a href="admin">Management</a></span>
+			<span><a href="http://localhost:8761/" target="_blank">Eureka</a></span>
+			<span><a href="http://localhost:15672/" target="_blank">RabbitMQ</a></span>
+		</div>
+		<div>
+			<div class="col-4">
+				<form th:action="login" method="post">
+					<span>Login</span>
+					<div class="vstack gap-2">
+						<input class="form-control" type="text" name="username"
+							value="user" placeholder="username"> <input
+							class="form-control" type="password" name="password" value="1234"
+							placeholder="password"> <input class="btn btn-primary"
+							type="submit" value="Login"> <a class="btn btn-primary"
+							href="signup">Sign Up</a>
+					</div>
+					<div th:if="${param.err}">
+						<label th:if="${param.err[0]} == 1">Login is required</label> <label
+							th:if="${param.err[0]} == 3">Wrong username - password</label>
+					</div>
+					<div th:if="${info} != null">
+						<label th:text="${info}"></label>
+					</div>
+				</form>
 			</div>
-			<div>
-				<input type="password" name="password" value="1234" placeholder="password">
-			</div>
-			<div>
-				<input type="submit" value="Login">
-			</div>
-			<div>
-				<a href="signup">Sign Up</a>
-			</div>
-			<div th:if="${param.err}">
-				<label th:if="${param.err[0]} == 1">Login is required</label> <label th:if="${param.err[0]} == 3">Wrong username - password</label>
-			</div>
-			<div th:if="${info} != null">
-				<label th:text="${info}"></label>
-			</div>
-		</form>
+		</div>
+		<div class="col-4"></div>
+		<div class="col-4"></div>
 	</div>
 </body>
+<script type="text/javascript" src="/js/bootstrap.bundle.min.js"></script>
 </html>
