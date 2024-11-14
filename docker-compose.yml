@@ -142,6 +142,11 @@ services:
     container_name: website
     ports:
       - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -156,10 +161,8 @@ services:
     depends_on:
       config-server:
         condition: service_healthy
-      rabbitmq:
+      website:
         condition: service_healthy
-      abutil:
-        condition: service_started
     networks:
       - spring-network
 
