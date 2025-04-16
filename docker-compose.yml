@@ -1,6 +1,7 @@
 services:
   eureka:
     build: ./ab - eureka/
+    image: ab-eureka:latest
     container_name: eureka
     ports:
       - "8761:8761"
@@ -14,6 +15,7 @@ services:
 
   config-server:
     build: ./ab - config server/
+    image: ab-config-server:latest
     container_name: config-server
     ports:
       - "8888:8888"
@@ -30,6 +32,7 @@ services:
       
   gateway:
     build: ./ab - gateway
+    image: ab-gateway:latest
     container_name: gateway
     ports:
       - "4441:4441"
@@ -41,6 +44,7 @@ services:
       
   abutil:
     build: ./ab - util
+    image: ab-util:latest
     container_name: abutil
     networks:
       - spring-network
@@ -59,6 +63,7 @@ services:
       
   userservice:
     build: ./ab - userservice
+    image: ab-userservice:latest
     container_name: userservice
     depends_on:
       config-server:
@@ -72,6 +77,7 @@ services:
       
   activityservice:
     build: ./ab - activityservice
+    image: ab-activityservice:latest
     container_name: activityservice
     depends_on:
       config-server:
@@ -85,6 +91,7 @@ services:
       
   paymentservice:
     build: ./ab - paymentservice
+    image: ab-paymentservice:latest
     container_name: paymentservice
     depends_on:
       config-server:
@@ -98,6 +105,7 @@ services:
       
   userservicefailover:
     build: ./ab - userservice-failover
+    image: ab-userservice-failover:latest
     container_name: userservicefailover
     depends_on:
       config-server:
@@ -107,6 +115,7 @@ services:
       
   activityservicefailover:
     build: ./ab - activityservice-failover
+    image: ab-activityservice-failover:latest
     container_name: activityservicefailover
     depends_on:
       config-server:
@@ -116,6 +125,7 @@ services:
       
   paymentservicefailover:
     build: ./ab - paymentservice-failover
+    image: ab-paymentservice-failover:latest
     container_name: paymentservicefailover
     depends_on:
       config-server:
@@ -139,6 +149,7 @@ services:
       
   website:
     build: ./ab - website
+    image: ab-website:latest
     container_name: website
     ports:
       - "8080:8080"
@@ -157,6 +168,7 @@ services:
       
   mailservice:
     build: ./ab - mailservice
+    image: ab-mailservice:latest
     container_name: mailservice
     depends_on:
       config-server:
