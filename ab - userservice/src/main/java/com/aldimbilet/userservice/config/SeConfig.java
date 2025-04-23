@@ -28,6 +28,7 @@ public class SeConfig
 		http.authorizeHttpRequests(c -> c.requestMatchers("/user/login").permitAll());
 		http.authorizeHttpRequests(c -> c.requestMatchers("/user/register").permitAll());
 		http.authorizeHttpRequests(c -> c.requestMatchers("/user/portinfo").permitAll());
+		http.authorizeHttpRequests(c -> c.requestMatchers("/actuator/health/**").permitAll());
 		// The rest of the endpoints may or may not require authentication, depends on your business decisions
 		http.authorizeHttpRequests(c -> c.anyRequest().authenticated());
 		// Add jwt athentication and authorization filters inside somwhere of the chain

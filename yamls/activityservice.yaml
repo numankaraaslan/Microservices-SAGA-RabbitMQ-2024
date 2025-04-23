@@ -1,0 +1,101 @@
+# ---------- DEPLOYMENT ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ab-activityservice-deployment
+  labels:
+    app: ab-activityservice
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ab-activityservice
+  template:
+    metadata:
+      labels:
+        app: ab-activityservice
+    spec:
+      initContainers:
+        - name: wait-for-config-server
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Config Server..."
+              until curl -sf http://config-server:8888/actuator/health | grep '"status":"UP"' > /dev/null; do
+                echo "Config Server not ready..."
+                sleep 3
+              done
+              echo "Config Server is UP!"
+
+        - name: wait-for-postgres
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for PostgreSQL..."
+              until nc -z postgresqldb 5432; do
+                echo "PostgreSQL not ready..."
+                sleep 3
+              done
+              echo "PostgreSQL is ready!"
+
+      containers:
+        - name: ab-activityservice
+          image: ab-activityservice:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8082
+          resources:
+            requests:
+              cpu: "100m"
+            limits:
+              cpu: "500m"
+          command: ["java"]
+          args:
+            - "-jar"
+            - "/app.jar"
+            - "--spring.profiles.active=kubernetes"
+            - "--logging.level.root=DEBUG"
+            - "--spring.datasource.url=jdbc:postgresql://postgresqldb:5432/AB"
+            - "--spring.cloud.config.uri=http://config-server:8888"
+            - "--eureka.client.service-url.defaultZone=http://aldimbilet:eureka@eureka:8761/eureka"
+            - "--eureka.instance.hostname=ab-activityservice"
+            - "--eureka.instance.nonSecurePort=8082"
+            - "--eureka.instance.preferIpAddress=false"
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8082
+            initialDelaySeconds: 40
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 20
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8082
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+
+---
+
+# ---------- SERVICE --------
+apiVersion: v1
+kind: Service
+metadata:
+  name: ab-activityservice
+spec:
+  selector:
+    app: ab-activityservice
+  ports:
+    - port: 8082
+      targetPort: 8082
+  type: ClusterIP
+

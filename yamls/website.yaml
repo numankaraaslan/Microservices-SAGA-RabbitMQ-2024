@@ -1,0 +1,78 @@
+# ---------- DEPLOYMENT ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: website-deployment
+  labels:
+    app: website
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: website
+
+  template:
+    metadata:
+      labels:
+        app: website
+    spec:
+      initContainers:
+        - name: wait-for-rabbitmq
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for RabbitMQ..."
+              until nc -z rabbitmq 5672; do
+                echo "RabbitMQ not ready..."
+                sleep 3
+              done
+              echo "RabbitMQ is ready!"
+
+      containers:
+        - name: website
+          image: ab-website:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: GATEWAY_ADRESS_USERSERVICE
+              value: http://gateway:4441/user/
+            - name: GATEWAY_ADRESS_ACTIVITYSERVICE
+              value: http://gateway:4441/act/
+            - name: GATEWAY_ADRESS_PAYMENTSERVICE
+              value: http://gateway:4441/pay/
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 20  # ~100s total
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2  # Restart quickly if unresponsive
+
+---
+# ---------- SERVICE ----------
+apiVersion: v1
+kind: Service
+metadata:
+  name: website
+spec:
+  type: ClusterIP
+  selector:
+    app: website
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+

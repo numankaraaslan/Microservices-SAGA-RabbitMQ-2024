@@ -1,0 +1,82 @@
+# ---------- DEPLOYMENT ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ab-userservice-failover-deployment
+  labels:
+    app: ab-userservice-failover
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ab-userservice-failover
+  template:
+    metadata:
+      labels:
+        app: ab-userservice-failover
+    spec:
+      initContainers:
+        - name: wait-for-config-server
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Config Server..."
+              until curl -sf http://config-server:8888/actuator/health | grep '"status":"UP"' > /dev/null; do
+                echo "Config Server not ready..."
+                sleep 3
+              done
+              echo "Config Server is UP!"
+
+      containers:
+        - name: ab-userservice-failover
+          image: ab-userservice-failover:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8086
+          command: ["java"]
+          args:
+            - "-jar"
+            - "/app.jar"
+            - "--spring.profiles.active=kubernetes"
+            - "--logging.level.root=DEBUG"
+            - "--spring.cloud.config.uri=http://config-server:8888"
+            - "--eureka.client.service-url.defaultZone=http://aldimbilet:eureka@eureka:8761/eureka"
+            - "--eureka.instance.hostname=ab-userservice-failover"
+            - "--eureka.instance.nonSecurePort=8086"
+            - "--eureka.instance.preferIpAddress=false"
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8086
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 20
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8086
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+
+---
+
+# ---------- SERVICE --------
+apiVersion: v1
+kind: Service
+metadata:
+  name: ab-userservice-failover
+spec:
+  selector:
+    app: ab-userservice-failover
+  ports:
+    - port: 8086
+      targetPort: 8086
+  type: ClusterIP
+

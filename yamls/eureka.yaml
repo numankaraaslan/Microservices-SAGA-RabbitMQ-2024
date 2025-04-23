@@ -1,0 +1,59 @@
+# ---------- DEPLOYMENT ----------
+apiVersion: apps/v1                     # We're using the apps API group (for Deployments)
+kind: Deployment                        # Kind = Deployment (manages replica Pods)
+metadata:
+  name: eureka-deployment               # Name of the Deployment object
+  labels:
+    app: eureka                         # A label to tag this deployment
+
+spec:
+  replicas: 1                           # We want 1 replica (Pod) of Eureka running
+  selector:
+    matchLabels:
+      app: eureka                       # This Deployment targets Pods with this label
+
+  template:                             # Template for the Pods it should create
+    metadata:
+      labels:
+        app: eureka                     # The Pods created will carry this label
+    spec:
+      containers:
+        - name: eureka                  # Name of the container
+          image: ab-eureka:latest       # Docker image to run (already built)
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8761       # Port the app listens on *inside the container*
+
+          # ✅ Health check — converted from Docker Compose
+          readinessProbe:               # Kubernetes will check if the app is "ready"
+            httpGet:
+              path: /actuator/health/readiness    # Spring Boot actuator health endpoint
+              port: 8761                # Same port the app exposes
+            initialDelaySeconds: 10     # ⏱ Wait 15s before first check
+            periodSeconds: 5           # 🔁 Then check every 10s
+            timeoutSeconds: 5           # ❌ Fail if no response in 5s
+            failureThreshold: 15         # 🔁 Retry 15 times before giving up
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8761
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 2
+
+---
+
+# ---------- SERVICE ----------
+apiVersion: v1                          # Core Kubernetes API group
+kind: Service
+metadata:
+  name: eureka
+spec:
+  selector:
+    app: eureka
+  ports:
+    - port: 8761
+      targetPort: 8761
+  type: ClusterIP
+  

@@ -1,0 +1,96 @@
+# ---------- DEPLOYMENT ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ab-userservice-deployment
+  labels:
+    app: ab-userservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ab-userservice
+  template:
+    metadata:
+      labels:
+        app: ab-userservice
+    spec:
+      initContainers:
+        - name: wait-for-config-server
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Config Server..."
+              until curl -sf http://config-server:8888/actuator/health | grep '"status":"UP"' > /dev/null; do
+                echo "Config Server not ready..."
+                sleep 3
+              done
+              echo "Config Server is UP!"
+
+        - name: wait-for-postgres
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for PostgreSQL..."
+              until nc -z postgresqldb 5432; do
+                echo "PostgreSQL not ready..."
+                sleep 3
+              done
+              echo "PostgreSQL is ready!"
+
+      containers:
+        - name: ab-userservice
+          image: ab-userservice:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8083
+          command: ["java"]
+          args:
+            - "-jar"
+            - "/app.jar"
+            - "--spring.profiles.active=kubernetes"
+            - "--logging.level.root=DEBUG"
+            - "--spring.datasource.url=jdbc:postgresql://postgresqldb:5432/AB"
+            - "--spring.cloud.config.uri=http://config-server:8888"
+            - "--eureka.client.service-url.defaultZone=http://aldimbilet:eureka@eureka:8761/eureka"
+            - "--eureka.instance.hostname=ab-userservice"
+            - "--eureka.instance.nonSecurePort=8083"
+            - "--eureka.instance.preferIpAddress=false"
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8083
+            initialDelaySeconds: 40
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 20  # relaxed: ~100s max before marking unready
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8083
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2  # anxious: fail quickly if truly unhealthy
+
+---
+
+# ---------- SERVICE --------
+apiVersion: v1
+kind: Service
+metadata:
+  name: ab-userservice
+spec:
+  selector:
+    app: ab-userservice
+  ports:
+    - port: 8083
+      targetPort: 8083
+  type: ClusterIP
+

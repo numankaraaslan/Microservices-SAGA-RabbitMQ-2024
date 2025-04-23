@@ -1,0 +1,82 @@
+# ---------- DEPLOYMENT ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ab-paymentservice-failover-deployment
+  labels:
+    app: ab-paymentservice-failover
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ab-paymentservice-failover
+  template:
+    metadata:
+      labels:
+        app: ab-paymentservice-failover
+    spec:
+      initContainers:
+        - name: wait-for-config-server
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Config Server..."
+              until curl -sf http://config-server:8888/actuator/health | grep '"status":"UP"' > /dev/null; do
+                echo "Config Server not ready..."
+                sleep 3
+              done
+              echo "Config Server is UP!"
+
+      containers:
+        - name: ab-paymentservice-failover
+          image: ab-paymentservice-failover:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8087
+          command: ["java"]
+          args:
+            - "-jar"
+            - "/app.jar"
+            - "--spring.profiles.active=kubernetes"
+            - "--logging.level.root=DEBUG"
+            - "--spring.cloud.config.uri=http://config-server:8888"
+            - "--eureka.client.service-url.defaultZone=http://aldimbilet:eureka@eureka:8761/eureka"
+            - "--eureka.instance.hostname=ab-paymentservice-failover"
+            - "--eureka.instance.nonSecurePort=8087"
+            - "--eureka.instance.preferIpAddress=false"
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8087
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 20
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8087
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+
+---
+
+# ---------- SERVICE --------
+apiVersion: v1
+kind: Service
+metadata:
+  name: ab-paymentservice-failover
+spec:
+  selector:
+    app: ab-paymentservice-failover
+  ports:
+    - port: 8087
+      targetPort: 8087
+  type: ClusterIP
+

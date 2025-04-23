@@ -1,6 +1,5 @@
 package com.aldimbilet.activityservicefailover.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,14 +13,12 @@ public class ActivityServiceFailoverController
 	@GetMapping(path = "activity-failover")
 	public ResponseEntity<Object> activityservicefailget()
 	{
-		ResponseEntity<Object> entity = new ResponseEntity<>("activity service is down, please wait", HttpStatus.SERVICE_UNAVAILABLE);
-		return entity;
+		return ResponseEntity.ok("activity service is down, please wait");
 	}
 
 	@PostMapping(path = "activity-failover")
 	public ResponseEntity<Object> activityservicefailpost()
 	{
-		ResponseEntity<Object> entity = new ResponseEntity<>("activity service is down, please wait", HttpStatus.SERVICE_UNAVAILABLE);
-		return entity;
+		return ResponseEntity.ok("activity service is down, please wait");
 	}
 }

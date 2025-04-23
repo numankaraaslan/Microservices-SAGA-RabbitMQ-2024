@@ -17,6 +17,7 @@ public class SeConfig
 		// csrf disable to get jwt headers go through
 		http.csrf(c -> c.disable());
 		http.authorizeHttpRequests(c -> c.requestMatchers("/pay/portinfo").permitAll());
+		http.authorizeHttpRequests(c -> c.requestMatchers("/actuator/health/**").permitAll());
 		// The rest of the endpoints may or may not require authentication, depends on your business decisions
 		http.authorizeHttpRequests(c -> c.anyRequest().authenticated());
 		// Add jwt authorization filters inside somwhere of the chain

@@ -1,6 +1,5 @@
 package com.aldimbilet.userservicefailover.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,14 +15,12 @@ public class UserServiceFailoverController
 	@GetMapping(path = "user-failover")
 	public ResponseEntity<Object> userServiceFails()
 	{
-		ResponseEntity<Object> entity = new ResponseEntity<>("user service is down, please wait", HttpStatus.SERVICE_UNAVAILABLE);
-		return entity;
+		return ResponseEntity.ok("user service is down, please wait");
 	}
 
 	@PostMapping(path = "user-failover")
 	public ResponseEntity<Object> userServiceFails(@RequestBody Object body)
 	{
-		ResponseEntity<Object> entity = new ResponseEntity<>("user service is down, please wait", HttpStatus.SERVICE_UNAVAILABLE);
-		return entity;
+		return ResponseEntity.ok("user service is down, please wait");
 	}
 }

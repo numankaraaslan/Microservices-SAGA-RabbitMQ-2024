@@ -1,0 +1,96 @@
+# ---------- DEPLOYMENT ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ab-paymentservice-deployment
+  labels:
+    app: ab-paymentservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ab-paymentservice
+  template:
+    metadata:
+      labels:
+        app: ab-paymentservice
+    spec:
+      initContainers:
+        - name: wait-for-config-server
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Config Server..."
+              until curl -sf http://config-server:8888/actuator/health | grep '"status":"UP"' > /dev/null; do
+                echo "Config Server not ready..."
+                sleep 3
+              done
+              echo "Config Server is UP!"
+
+        - name: wait-for-postgres
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for PostgreSQL..."
+              until nc -z postgresqldb 5432; do
+                echo "PostgreSQL not ready..."
+                sleep 3
+              done
+              echo "PostgreSQL is ready!"
+
+      containers:
+        - name: ab-paymentservice
+          image: ab-paymentservice:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8084
+          command: ["java"]
+          args:
+            - "-jar"
+            - "/app.jar"
+            - "--spring.profiles.active=kubernetes"
+            - "--logging.level.root=DEBUG"
+            - "--spring.datasource.url=jdbc:postgresql://postgresqldb:5432/AB"
+            - "--spring.cloud.config.uri=http://config-server:8888"
+            - "--eureka.client.service-url.defaultZone=http://aldimbilet:eureka@eureka:8761/eureka"
+            - "--eureka.instance.hostname=ab-paymentservice"
+            - "--eureka.instance.nonSecurePort=8084"
+            - "--eureka.instance.preferIpAddress=false"
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8084
+            initialDelaySeconds: 40
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 20
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8084
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+
+---
+
+# ---------- SERVICE --------
+apiVersion: v1
+kind: Service
+metadata:
+  name: ab-paymentservice
+spec:
+  selector:
+    app: ab-paymentservice
+  ports:
+    - port: 8084
+      targetPort: 8084
+  type: ClusterIP
+

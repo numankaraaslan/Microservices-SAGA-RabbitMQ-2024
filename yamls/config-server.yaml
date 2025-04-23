@@ -1,0 +1,73 @@
+# ---------- DEPLOYMENT ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: config-server-deployment
+  labels:
+    app: config-server
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: config-server
+
+  template:
+    metadata:
+      labels:
+        app: config-server
+    spec:
+      initContainers:
+        - name: wait-for-eureka
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Eureka..."
+              until curl -sf http://eureka:8761/actuator/health | grep '"status":"UP"' > /dev/null; do
+                echo "Eureka not ready yet..."
+                sleep 3
+              done
+              echo "Eureka is UP!"
+
+      containers:
+        - name: config-server
+          image: ab-config-server:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8888
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8888
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 20
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8888
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+
+---
+
+# ---------- SERVICE ----------
+apiVersion: v1
+kind: Service
+metadata:
+  name: config-server
+
+spec:
+  selector:
+    app: config-server
+  ports:
+    - port: 8888
+      targetPort: 8888
+  type: ClusterIP
+

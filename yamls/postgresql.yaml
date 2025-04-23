@@ -1,0 +1,74 @@
+# ---------- DEPLOYMENT ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+  labels:
+    app: postgresqldb
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgresqldb
+
+  template:
+    metadata:
+      labels:
+        app: postgresqldb
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:latest               # Official PostgreSQL image from Docker Hub
+          ports:
+            - containerPort: 5432              # PostgreSQL default port
+          env:
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              value: "123456789"
+            - name: POSTGRES_DB
+              value: "AB"
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+
+          readinessProbe:
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 5
+
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - postgres
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+
+      volumes:
+        - name: postgres-storage
+          emptyDir: {}                         # ⚠️ Temporary storage; not persistent after pod restart
+
+---
+
+# ---------- SERVICE ----------
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresqldb                           # Internal DNS will be http://postgresqldb:5432
+
+spec:
+  selector:
+    app: postgresqldb
+  ports:
+    - port: 5432
+      targetPort: 5432
+  type: ClusterIP                               # Internal access only
+

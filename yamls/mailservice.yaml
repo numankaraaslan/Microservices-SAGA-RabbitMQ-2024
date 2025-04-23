@@ -1,0 +1,89 @@
+# ---------- DEPLOYMENT ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailservice-deployment
+  labels:
+    app: mailservice
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mailservice
+
+  template:
+    metadata:
+      labels:
+        app: mailservice
+    spec:
+      initContainers:
+        - name: wait-for-config-server
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Config Server..."
+              until curl -sf http://config-server:8888/actuator/health | grep '"status":"UP"' > /dev/null; do
+                echo "Config Server not ready..."
+                sleep 3
+              done
+              echo "Config Server is UP!"
+
+        - name: wait-for-rabbitmq
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for RabbitMQ..."
+              until nc -z rabbitmq 5672; do
+                echo "RabbitMQ not ready..."
+                sleep 3
+              done
+              echo "RabbitMQ is ready!"
+
+      containers:
+        - name: mailservice
+          image: ab-mailservice:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 9099
+          command: ["java"]
+          args:
+            - "-jar"
+            - "/app.jar"
+            - "--spring.profiles.active=kubernetes"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 9099
+            initialDelaySeconds: 40
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 20
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 9099
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+
+---
+
+# ---------- SERVICE ----------
+apiVersion: v1
+kind: Service
+metadata:
+  name: mailservice
+spec:
+  selector:
+    app: mailservice
+  ports:
+    - port: 9099
+      targetPort: 9099
+  type: ClusterIP
+
