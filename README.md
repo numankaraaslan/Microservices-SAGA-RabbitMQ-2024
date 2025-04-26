@@ -15,3 +15,9 @@ All you need is install docker engine, open terminal in the root folder and "doc
 ## License
 This project is licensed under the terms of the [Apache License 2.0](LICENSE).
 Please see the [NOTICE](NOTICE) file for attribution requirements.
+
+# Aldımbilet Spring Cloud Microservice
+
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+
+A microservice architecture project by Numan Karaaslan.
