@@ -21,6 +21,7 @@ import org.springframework.context.annotation.DependsOn;
 // Bean names in this config is necessary to avoid confusion
 // We are creating same bean types across spring boot
 // If you don't specify bean names, spring boot will inject wrong
+// docker run --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:management-alpine
 public class RabbitConfig
 {
 	@Bean
